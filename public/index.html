@@ -251,7 +251,10 @@
 
                 const response = await fetch(`${API_BASE_URL}/submit-post`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-human-wall-token': 'organic-intelligence-2026-secret'
+                    },
                     body: JSON.stringify({
                         content: content,
                         certificate: certData.certificate,
@@ -272,7 +275,7 @@
                     statusMsg.className = "error";
                 }
             } catch (e) {
-                console.error(e);
+                error: (e) => console.error(e);
                 statusMsg.innerText = "ERROR: Connection refused.";
                 statusMsg.className = "error";
             }
@@ -293,7 +296,9 @@
         }
 
         // Initial Load
-        fetch(`${API_BASE_URL}/feed`)
+        fetch(`${API_BASE_URL}/feed`, {
+            headers: { 'x-human-wall-token': 'organic-intelligence-2026-secret' }
+        })
             .then(res => res.json())
             .then(loadFeed)
             .catch(e => console.log("Server offline"));

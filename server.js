@@ -8,6 +8,18 @@ app.use(express.json());
 app.use(cors());
 app.use(express.static('public')); // Serve the Wall
 
+// --- PRIVATE ACCESS CONFIG ---
+const AUTH_TOKEN = "organic-intelligence-2026-secret"; // The "Secret Handshake"
+
+const restrictAccess = (req, res, next) => {
+    const token = req.headers['x-human-wall-token'];
+    if (token !== AUTH_TOKEN) {
+        return res.status(401).json({ error: "UNAUTHORIZED: This server is private." });
+    }
+    next();
+};
+// -----------------------------
+
 
 // Load key or Generate if missing (for Deployment)
 let privateKey;
@@ -83,7 +95,7 @@ const feed = []; // In-memory verification feed
 
 // publicKey is already loaded at the top
 
-app.post('/submit-post', (req, res) => {
+app.post('/submit-post', restrictAccess, (req, res) => {
     const { content, signature, certificate } = req.body;
 
     console.log("Verifying post...");
