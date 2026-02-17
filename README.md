@@ -12,14 +12,14 @@ This project consists of two parts:
 1.  **The Observer (Browser Extension):** Watches *how* you type, not just *what* you type. It generates a "Humanity Score" and requests a cryptographic signature.
 2.  **The Wall (Server + UI):** A Matrix-themed feed that verifies signatures on the blockchain (simulated) and rejects anything that wasn't physically typed by a human.
 
-## 🚀 Features
+##  Features
 -   **Biometric Identity:** Your "User ID" (`0xA3F...`) is generated from your unique typing rhythm.
 -   **Matrix Digital Rain:** Full-screen HTML5 Canvas background.
 -   **Cyberpunk Audio Engine:** Generative "Dark Drone" and "Digital Water" soundscapes (Web Audio API).
 -   **Tron Aesthetic:** Neon Cyan styling for verified human entities.
 -   **Bot Blocking:** Copy-pasting from ChatGPT is instantly rejected.
 
-## 🛠️ Installation
+## Installation
 
 ### 1. The Server (The Wall)
 This repo contains the backend and the frontend.
@@ -42,5 +42,5 @@ You need the Companion Extension to post.
 4.  Click **Load Unpacked** and select the folder.
 5.  Go to the URL and start typing.
 
-## 📜 License
+## License
 Unlicense (Public Domain). Code is Law.
