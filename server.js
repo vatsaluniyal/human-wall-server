@@ -79,8 +79,6 @@ app.post('/certify', (req, res) => {
 // --- NEW: The Wall (Verification Endpoint) ---
 const feed = []; // In-memory verification feed
 
-const feed = []; // In-memory verification feed
-
 // publicKey is already loaded at the top
 
 app.post('/submit-post', (req, res) => {
