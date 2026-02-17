@@ -91,7 +91,22 @@ app.post('/certify', (req, res) => {
 });
 
 // --- NEW: The Wall (Verification Endpoint) ---
-const feed = []; // In-memory verification feed
+let feed = [];
+
+// Load existing posts if they exist
+if (fs.existsSync('posts.json')) {
+    try {
+        feed = JSON.parse(fs.readFileSync('posts.json', 'utf8'));
+        console.log(`Loaded ${feed.length} posts from disk.`);
+    } catch (e) {
+        console.error("Error loading posts.json:", e);
+    }
+}
+
+const savePosts = () => {
+    fs.writeFileSync('posts.json', JSON.stringify(feed, null, 2));
+};
+
 
 // publicKey is already loaded at the top
 
@@ -138,6 +153,7 @@ app.post('/submit-post', restrictAccess, (req, res) => {
             timestamp: new Date().toLocaleTimeString()
         };
         feed.unshift(post);
+        savePosts(); // Persist to disk
 
         return res.json({ success: true, feed: feed });
     } else {
