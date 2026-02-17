@@ -60,14 +60,17 @@ app.post('/certify', (req, res) => {
         return res.status(403).json({ error: "Humanity score too low for certification." });
     }
 
-    // Generate Biometric ID from typing pattern (First 10 keystrokes flight times)
-    // This creates a pseudo-unique ID based on *how* they typed.
-    let biometricSeed = "unknown";
-    if (telemetry && telemetry.keystrokes && telemetry.keystrokes.length > 0) {
-        biometricSeed = telemetry.keystrokes.map(k => k.flightTime).join(",");
+    // Use persistent Human ID (The Digital Soul) if provided, otherwise fallback to Biometric
+    let matrixId = telemetry.human_id || "0xUNKNOWN";
+
+    if (matrixId === "0xUNKNOWN") {
+        let biometricSeed = "unknown";
+        if (telemetry && telemetry.keystrokes && telemetry.keystrokes.length > 0) {
+            biometricSeed = telemetry.keystrokes.map(k => k.flightTime).join(",");
+        }
+        const bioHash = crypto.createHash('sha256').update(biometricSeed).digest('hex').substring(0, 8).toUpperCase();
+        matrixId = `0x${bioHash}`;
     }
-    const bioHash = crypto.createHash('sha256').update(biometricSeed).digest('hex').substring(0, 8).toUpperCase();
-    const matrixId = `0x${bioHash}`; // e.g. 0xA3F192B4
 
     // Create the packet to sign
     const certificatePayload = {
