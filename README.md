@@ -6,7 +6,7 @@
 
 ![Matrix Aesthetic](https://media.giphy.com/media/U3qYN8S0j3bpK/giphy.gif)
 
-## 🔮 The Concept
+## The Concept
 The internet is flooding with AI slop. We needed a way to verify **Organic Intelligence**.
 This project consists of two parts:
 1.  **The Observer (Browser Extension):** Watches *how* you type, not just *what* you type. It generates a "Humanity Score" and requests a cryptographic signature.
