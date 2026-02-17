@@ -6,6 +6,8 @@ const cors = require('cors');
 const app = express();
 app.use(express.json());
 app.use(cors());
+app.use(express.static('public')); // Serve the Wall
+
 
 // Load key or Generate if missing (for Deployment)
 let privateKey;

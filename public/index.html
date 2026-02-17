@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Human Wall | Verified Organic Content</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background: #000;
+            color: #0f0;
+            padding: 40px;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        .container {
+            position: relative;
+            z-index: 10;
+            max-width: 800px;
+            margin: 0 auto;
+            border: 2px solid #0f0;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
+            background: rgba(0, 0, 0, 0.8);
+        }
+
+        h1 {
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            border-bottom: 1px solid #0f0;
+            padding-bottom: 20px;
+            text-shadow: 0 0 10px #0f0;
+        }
+
+        /* Matrix Rain Canvas */
+        #matrix-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        .post-form {
+            margin-bottom: 40px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            background: #111;
+            color: #0f0;
+            border: 1px solid #333;
+            padding: 15px;
+            font-family: inherit;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #0f0;
+        }
+
+        button {
+            background: #0f0;
+            color: #000;
+            border: none;
+            padding: 10px 30px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: #fff;
+            box-shadow: 0 0 15px #0f0;
+        }
+
+        .feed {
+            margin-top: 40px;
+        }
+
+        .post {
+            border: 1px solid #0f0;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: rgba(0, 20, 0, 0.9);
+            box-shadow: 0 0 5px rgba(0, 255, 0, 0.1);
+            animation: fadeIn 0.5s ease;
+        }
+
+        .meta {
+            font-size: 12px;
+            color: #8f8;
+            margin-bottom: 5px;
+            border-bottom: 1px dashed #0f0;
+            padding-bottom: 5px;
+        }
+
+        .content {
+            font-size: 18px;
+            line-height: 1.5;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        #status-msg {
+            margin-top: 10px;
+            font-weight: bold;
+            text-shadow: 0 0 5px currentColor;
+        }
+
+        .error {
+            color: #ff3333;
+        }
+
+        .success {
+            color: #0f0;
+        }
+
+        /* Tron Identity Style */
+        .tron-id {
+            color: #0ff;
+            /* Cyan */
+            text-shadow: 0 0 5px #0ff, 0 0 10px #0ff;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        /* Hidden input for the signature */
+        #human-certificate {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <canvas id="matrix-canvas"></canvas>
+
+    <div class="container">
+        <h1>The Human Wall</h1>
+        <p style="text-align: center; color: #666;">Only cryptographically signed human thoughts allowed.</p>
+
+        <div class="post-form">
+            <textarea id="post-content" placeholder="Type something human..."></textarea>
+            <!-- The Extension will inject the signature JSON here -->
+            <input type="hidden" id="human-certificate">
+
+            <br>
+            <button onclick="submitPost()">Post to Wall</button>
+            <div id="status-msg"></div>
+        </div>
+
+        <div class="feed" id="feed">
+            <!-- Posts go here -->
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIGURATION ---
+        const API_BASE_URL = "https://human-wall-server-1.onrender.com"; // Production URL
+        // ---------------------
+
+        // --- Matrix Rain Logic ---
+        const canvas = document.getElementById('matrix-canvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン';
+        const latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const nums = '0123456789';
+        const alphabet = katakana + latin + nums;
+
+        const fontSize = 16;
+        const columns = canvas.width / fontSize;
+
+        const rainDrops = [];
+
+        for (let x = 0; x < columns; x++) {
+            rainDrops[x] = 1;
+        }
+
+        const draw = () => {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = '#0F0';
+            ctx.font = fontSize + 'px monospace';
+
+            for (let i = 0; i < rainDrops.length; i++) {
+                const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+                ctx.fillText(text, i * fontSize, rainDrops[i] * fontSize);
+
+                if (rainDrops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    rainDrops[i] = 0;
+                }
+                rainDrops[i]++;
+            }
+        };
+
+        setInterval(draw, 30);
+
+        // Resize handler
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        async function submitPost() {
+            const content = document.getElementById('post-content').value;
+            const certRaw = document.getElementById('human-certificate').value;
+            const statusMsg = document.getElementById('status-msg');
+
+            statusMsg.innerText = "Verifying on blockchain...";
+            statusMsg.className = "";
+
+            if (!certRaw) {
+                statusMsg.innerText = "BLOCKED: No Human Signature found. Did you type this manually?";
+                statusMsg.className = "error";
+                return;
+            }
+
+            try {
+                const certData = JSON.parse(certRaw); // { certificate, signature }
+
+                const response = await fetch(`${API_BASE_URL}/submit-post`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        content: content,
+                        certificate: certData.certificate,
+                        signature: certData.signature
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    statusMsg.innerText = "SUCCESS: Content Verified & Posted.";
+                    statusMsg.className = "success";
+                    document.getElementById('post-content').value = "";
+                    document.getElementById('human-certificate').value = ""; // Clear sig
+                    loadFeed(result.feed);
+                } else {
+                    statusMsg.innerText = result.error;
+                    statusMsg.className = "error";
+                }
+            } catch (e) {
+                console.error(e);
+                statusMsg.innerText = "ERROR: Connection refused.";
+                statusMsg.className = "error";
+            }
+        }
+
+        function loadFeed(posts) {
+            const feed = document.getElementById('feed');
+            feed.innerHTML = "";
+            posts.forEach(post => {
+                const div = document.createElement('div');
+                div.className = 'post';
+                div.innerHTML = `
+                <div class="meta">VERIFIED HUMAN | ${post.timestamp} | ID: <span class="tron-id">${post.author_id.substring(0, 10)}...</span></div>
+                <div class="content">${post.content}</div>
+            `;
+                feed.appendChild(div);
+            });
+        }
+
+        // Initial Load
+        fetch(`${API_BASE_URL}/feed`)
+            .then(res => res.json())
+            .then(loadFeed)
+            .catch(e => console.log("Server offline"));
+
+        // --- NEW: Polling for Signature Injection ---
+        setInterval(() => {
+            const certVal = document.getElementById('human-certificate').value;
+            const btn = document.querySelector('button');
+            const statusMsg = document.getElementById('status-msg');
+
+            if (certVal && btn.innerText === "Post to Wall") {
+                btn.innerText = "Verified & Ready";
+                btn.style.background = "#0ff"; // Tron Cyan
+                btn.style.color = "#000";
+                btn.style.boxShadow = "0 0 15px #0ff";
+                if (statusMsg.className === "error") statusMsg.innerText = ""; // Clear error
+            }
+        }, 500);
+
+        // --- NEW: Cyberpunk Audio Engine (Web Audio API) ---
+        // Generates "The Grid" soundscape from pure code. Zero mp3s. 100% Math.
+        let audioCtx;
+        let masterGain;
+        let isPlaying = false;
+
+        const toggleAudio = () => {
+            const btn = document.getElementById('audio-btn');
+            if (isPlaying) {
+                // Fade out
+                masterGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1);
+                setTimeout(() => {
+                    audioCtx.suspend();
+                    btn.innerText = "AUDIO: OFF";
+                    btn.style.borderColor = "#333";
+                    btn.style.color = "#888";
+                    btn.style.boxShadow = "none";
+                }, 1000);
+                isPlaying = false;
+            } else {
+                // Init Audio Context (must be user triggered)
+                if (!audioCtx) initAudio();
+                audioCtx.resume();
+
+                // Fade in
+                masterGain.gain.exponentialRampToValueAtTime(0.3, audioCtx.currentTime + 2);
+
+                btn.innerText = "AUDIO: ONLINE";
+                btn.style.borderColor = "#0ff";
+                btn.style.color = "#0ff";
+                btn.style.boxShadow = "0 0 10px #0ff";
+                isPlaying = true;
+            }
+        };
+
+        function initAudio() {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            masterGain = audioCtx.createGain();
+            masterGain.gain.value = 0; // Start silent
+            masterGain.connect(audioCtx.destination);
+
+            // DRONE 1: Deep Bass Pad (The Foundation)
+            const osc1 = audioCtx.createOscillator();
+            osc1.type = 'sawtooth';
+            osc1.frequency.value = 55; // A1 (Low)
+
+            const filter1 = audioCtx.createBiquadFilter();
+            filter1.type = 'lowpass';
+            filter1.frequency.value = 200; // Muffled
+
+            // LFO for Filter 1 (Breathing effect)
+            const lfo1 = audioCtx.createOscillator();
+            lfo1.type = 'sine';
+            lfo1.frequency.value = 0.1; // Very slow breath (10s)
+            const lfo1Gain = audioCtx.createGain();
+            lfo1Gain.gain.value = 150; // Modulate filter by +/- 150Hz
+
+            lfo1.connect(lfo1Gain);
+            lfo1Gain.connect(filter1.frequency);
+
+            osc1.connect(filter1);
+            filter1.connect(masterGain);
+
+            // DRONE 2: High Detuned Layer (The Tension)
+            const osc2 = audioCtx.createOscillator();
+            osc2.type = 'sawtooth';
+            osc2.frequency.value = 55.5; // Slightly detuned
+
+            const filter2 = audioCtx.createBiquadFilter();
+            filter2.type = 'lowpass';
+            filter2.frequency.value = 400;
+
+            osc2.connect(filter2);
+            filter2.connect(masterGain);
+
+            // Start engines
+            osc1.start();
+            osc2.start();
+            lfo1.start();
+
+            // --- LAYER 3: DIGITAL WATER (Physics Synthesis) ---
+
+            // Sub-Layer A: The Flow (Brown Noise - Underwater Ambience)
+            const bufferSize = audioCtx.sampleRate * 2; // 2 seconds buffer
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            let lastOut = 0; // Declare lastOut before using it
+            for (let i = 0; i < bufferSize; i++) {
+                // Brown noise approximation (integrate white noise)
+                const white = Math.random() * 2 - 1;
+                data[i] = (lastOut + (0.02 * white)) / 1.02;
+                lastOut = data[i];
+                data[i] *= 3.5; // Compensate gain
+            }
+
+            const noiseNode = audioCtx.createBufferSource();
+            noiseNode.buffer = buffer;
+            noiseNode.loop = true;
+
+            const noiseFilter = audioCtx.createBiquadFilter();
+            noiseFilter.type = 'lowpass';
+            noiseFilter.frequency.value = 400; // Deep water
+
+            const noiseGain = audioCtx.createGain();
+            noiseGain.gain.value = 0.05;
+
+            noiseNode.connect(noiseFilter);
+            noiseFilter.connect(noiseGain);
+            noiseGain.connect(masterGain);
+            noiseNode.start();
+
+            // Sub-Layer B: The Droplets (Sine Chirps)
+            const rainGain = audioCtx.createGain();
+            rainGain.gain.value = 0.3;
+
+            // Reverb-ish Delay
+            const delay = audioCtx.createDelay();
+            delay.delayTime.value = 0.15;
+            const delayFeedback = audioCtx.createGain();
+            delayFeedback.gain.value = 0.2;
+
+            delay.connect(delayFeedback);
+            delayFeedback.connect(delay);
+            rainGain.connect(delay);
+            delay.connect(masterGain);
+            rainGain.connect(masterGain);
+
+            // Droplet Sequencer
+            setInterval(() => {
+                if (!isPlaying) return;
+
+                // High density check (Water is chaotic)
+                if (Math.random() > 0.7) {
+                    const now = audioCtx.currentTime;
+
+                    const osc = audioCtx.createOscillator();
+                    osc.type = 'sine'; // Pure liquid tone
+
+                    // Pitch Drop Envelope (The "Bloop" sound)
+                    // Start High -> Drop Low quickly
+                    const startFreq = 600 + (Math.random() * 1000); // 600-1600Hz
+                    osc.frequency.setValueAtTime(startFreq, now);
+                    osc.frequency.exponentialRampToValueAtTime(startFreq * 0.5, now + 0.1);
+
+                    const env = audioCtx.createGain();
+                    env.gain.setValueAtTime(0, now);
+                    env.gain.linearRampToValueAtTime(0.1, now + 0.01); // Fast attack
+                    env.gain.exponentialRampToValueAtTime(0.001, now + 0.15); // Fast decay
+
+                    // Stereo Panning (Swirling)
+                    const panner = audioCtx.createStereoPanner();
+                    panner.pan.value = Math.sin(now); // Pan back and forth
+
+                    osc.connect(env);
+                    env.connect(panner);
+                    panner.connect(rainGain);
+
+                    osc.start(now);
+                    osc.stop(now + 0.2);
+                }
+            }, 80);
+        }
+
+        // Add Audio Button to Container
+        const container = document.querySelector('.container');
+        const audioBtn = document.createElement('button');
+        audioBtn.id = 'audio-btn';
+        audioBtn.innerText = "AUDIO: OFF";
+        audioBtn.style.marginTop = "20px";
+        audioBtn.style.background = "transparent";
+        audioBtn.style.border = "1px solid #333";
+        audioBtn.style.color = "#888";
+        audioBtn.style.fontSize = "12px";
+        audioBtn.style.padding = "5px 10px";
+        audioBtn.onclick = toggleAudio;
+
+        // Insert before the form
+        const form = document.querySelector('.post-form');
+        container.insertBefore(audioBtn, form);
+
+    </script>
+
+</body>
+
+</html>
