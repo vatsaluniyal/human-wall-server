@@ -7,12 +7,26 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// Load key
+// Load key or Generate if missing (for Deployment)
 let privateKey;
+let publicKey;
+
+if (!fs.existsSync('private.pem') || !fs.existsSync('public.pem')) {
+    console.log("Keys not found. Generating new RSA Keypair...");
+    const { publicKey: pub, privateKey: priv } = crypto.generateKeyPairSync('rsa', {
+        modulusLength: 2048,
+    });
+
+    fs.writeFileSync('private.pem', priv.export({ type: 'pkcs1', format: 'pem' }));
+    fs.writeFileSync('public.pem', pub.export({ type: 'pkcs1', format: 'pem' }));
+    console.log("Keys generated successfully.");
+}
+
 try {
     privateKey = fs.readFileSync('private.pem', 'utf8');
+    publicKey = fs.readFileSync('public.pem', 'utf8'); // Load public key here too
 } catch (e) {
-    console.error("No keys found! Run generated_keys.js first.");
+    console.error("Critical Error loading keys:", e);
     process.exit(1);
 }
 
@@ -65,12 +79,9 @@ app.post('/certify', (req, res) => {
 // --- NEW: The Wall (Verification Endpoint) ---
 const feed = []; // In-memory verification feed
 
-let publicKey;
-try {
-    publicKey = fs.readFileSync('public.pem', 'utf8');
-} catch (e) {
-    console.error("No public key found!");
-}
+const feed = []; // In-memory verification feed
+
+// publicKey is already loaded at the top
 
 app.post('/submit-post', (req, res) => {
     const { content, signature, certificate } = req.body;
